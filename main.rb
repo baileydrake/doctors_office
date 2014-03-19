@@ -67,8 +67,10 @@ end
   def search_doctor
     puts "Search doctors by name or specialty or insurance: "
     user_input = gets.chomp.upcase
-    result = Doctor.search(user_input)
-    puts result
+    results = Doctor.search(user_input)
+    results.each do |doctor|
+      puts "#{doctor.name}, #{doctor.specialization}, #{doctor.insurance}ß"
+    end
     puts "Press 'p' to see their patients or 'm' for main menu"
     user_input = gets.chomp.upcase
     case user_input

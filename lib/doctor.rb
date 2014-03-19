@@ -1,10 +1,11 @@
 class Doctor
 
-attr_reader(:name, :specialization)
+attr_reader(:name, :specialization, :insurance)
 
-  def initialize(name, specialization)
+  def initialize(name, specialization, insurance)
     @name = name
     @specialization = specialization
+    @insurance = insurance
   end
 
   def self.all
@@ -13,14 +14,14 @@ attr_reader(:name, :specialization)
     results.each do |result|
       name = result['name']
       specialization = result['specialization']
+      insurance = result['insurance']
       doctors << Doctor.new(name, specialization)
     end
     doctors
   end
 
   def save
-    database = PG.connect({:dbname => 'doc_office'})
-    DB.exec("INSERT INTO doctors (name, specialization) VALUES ('#{name}', '#{specialization}');")
+    DB.exec("INSERT INTO doctors (name, specialization, insurance) VALUES ('#{name}', '#{specialization}', #{insurance});")
   end
 
   def ==(another_doctor)
@@ -28,13 +29,24 @@ attr_reader(:name, :specialization)
   end
 
   def self.search(user_input)
-    result = DB.exec("SELECT * FROM doctors WHERE name = '#{user_input}' OR specialization = '#{user_input}'")
+    result = DB.exec("SELECT * FROM doctors WHERE name LIKE '%#{user_input}%' OR specialization LIKE '%#{user_input}%' OR insurance LIKE '%#{user_input}%'")
     search_result = []
     result.each do |result|
       name = result['name']
-      specialization = result ['specialization']
-      search_result << name + ", " + specialization
+      specialization = result['specialization']
+      insurance = result['insurance']
+      search_result << Doctor.new(name, specialization, insurance) #name + ", " + specialization + ", " + insurance
     end
     search_result
+  end
+
+  def self.list
+    results = DB.exec("SELECT * FROM doctors;")
+    doctors = []
+    results.each do |result|
+      name = result['name']
+      doctors << name
+    end
+    doctors
   end
 end
